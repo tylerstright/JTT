@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+/images
 R/cdms_api_keys.R
 data/environment
 data/Map Stuff

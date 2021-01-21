@@ -23,7 +23,7 @@ sth_props <- sth_ages %>%
   pivot_wider(id_cols = c('year', 'StreamSection'), names_from = ScaleFinalAge, values_from = p)
 
 # Read in PTAGIS data and prep ----
-dobos <- read_csv('./data/dobos/Steelhead Dobos 2008-2017.csv') # PTAGIS query data
+dobos <- read_csv('./data/dobos/Steelhead Dobos 2008-2020.csv') # PTAGIS query data
 
 names(dobos) <- tolower(gsub(' ', '_', names(dobos)))
 
@@ -35,11 +35,8 @@ data <- dobos %>%
   mutate(migratory_year = year(first_obs_date),
          trap_year = if_else(month(mark_date)>=7, year(mark_date)+1, year(mark_date)),
          month_tagged = month(mark_date, label=TRUE),
-         # OVERWINTER CALCS - Ty doesn't like this metric.
-         # overwinters = if_else(month(release_date)<=6,
-         #                       migratory_year-trap_year+1, # we assume all spring-tagged fish have an overwinter (reasonable)
-         #                       as.double(migratory_year-trap_year)),
-         overwinters=migratory_year-trap_year,
+         # OVERWINTERS
+         overwinters=migratory_year-trap_year+1,
          trap_season = case_when(
            month(mark_date) %in% c(1:6) ~ 'Spring',
            month(mark_date) %in% c(7:8) ~ 'Summer',
@@ -49,7 +46,8 @@ data <- dobos %>%
          `trapyear+2` = if_else(trap_year==migratory_year-2, 1, 0),
          `trapyear+3` = if_else(trap_year==migratory_year-3, 1, 0),
          `trapyear+4` = if_else(trap_year==migratory_year-4, 1, 0),
-         `trapyear+5` = if_else(trap_year==migratory_year-5, 1, 0)
+         `trapyear+5` = if_else(trap_year==migratory_year-5, 1, 0),
+         julian = yday(mark_date)
          ) %>%
   mutate_at(.vars = c('migratory_year', 'trap_year', 'overwinters'), as.factor) %>%
   filter(overwinters != -1)  # only  one "-1" record
@@ -68,12 +66,14 @@ ggplot(dobos_tags, aes(x=mark_length_mm, y = DTH)) + #color?
   geom_point(shape = 21, aes(fill = overwinters), color = 'black') +
   facet_grid(trap_season~ScaleFinalAge) +
   scale_fill_viridis_d(direction = -1) +
+  scale_y_continuous() +
   theme_bw()
 
  # length histo
 ggplot(dobos_tags, aes(x=mark_length_mm)) +
-  geom_histogram(aes(x=mark_length_mm, fill=ScaleFinalAge), color='black', position='dodge') +
+  geom_histogram(aes(x=mark_length_mm, fill=ScaleFinalAge), position='dodge', bins = 50) +
   scale_fill_viridis_d(direction=-1) +
+  facet_wrap(~site_name) +
   theme_bw() +
   theme(plot.background = element_rect(fill='black'),
         panel.background = element_rect(fill='grey'))
@@ -92,17 +92,30 @@ dobos_tags_tymy <- data %>%
   filter(!grepl('Lolo', StreamSection))
 
 
-ggplot(dobos_tags_tymy, aes(x=mark_length_mm, y = what_year)) + 
-  geom_jitter(height = 0.2, shape = 21, aes(fill = trap_year), color = 'black') +
-  facet_grid(trap_season~ScaleFinalAge) +
+# ggplot(dobos_tags_tymy, aes(x=mark_length_mm, y = what_year)) +
+#   geom_jitter(height = 0.2, shape = 21, aes(fill = trap_year), color = 'black') +
+#   facet_grid(trap_season~ScaleFinalAge) +
+#   # facet_grid(month_tagged~ScaleFinalAge) +
+#   scale_fill_viridis_d(direction = -1) +
+#   theme_bw()
+
+ggplot(dobos_tags_tymy, aes(x=julian, y = mark_length_mm)) + 
+  geom_jitter(height = 0.2, aes(color = ScaleFinalAge), size = 2) +
+  # facet_wrap(~what_year) +
+  facet_grid(what_year~trap_year) +
   # facet_grid(month_tagged~ScaleFinalAge) +  
+  scale_color_viridis_d(direction = -1) +
+  theme_bw() 
+
+ggsave(filename = './images/dobos_tymy.png', height = 10, width = 15)
+
+# No Ages
+ggplot(data, aes(x=mark_length_mm, y = overwinters)) + 
+  geom_jitter(height = 0.2, shape=21, aes(fill = trap_year), color = 'black') +
+  # facet_grid(trap_season~site_name) +
+  facet_grid(month_tagged~site_name) +
   scale_fill_viridis_d(direction = -1) +
-  theme_bw()
-
-ggsave(filename = './tys_dobos.png', height = 10, width = 15)
-
-
-
+  theme_bw() + xlab('Mark Length (mm)') + ylab('Migration Year')
 
 
 
