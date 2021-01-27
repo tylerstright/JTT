@@ -1,0 +1,26 @@
+---
+title: "Estimating steelhead life history variants in the Snake River basin"
+author: "Ryan N. Kinzer"
+date: "1/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, error = FALSE, fig.retina = 5, fig.height = 7, fig.width = 9)
+```
+
+Goal: Determine an approach to partition *O. mykiss* juvenile abundance at NPT rotary screw traps into cohort tables (i.e., brood year, migratory year and resident groups) to estimate survival and productivity metrics.
+
+Objective 1: Estimate proportion of *O. mykiss* smolting in different migratory years for individuals passing rotary screw traps each trapping season.
+
+Objective 3: Estimate age proportions for *O. mykiss* individuals passing rotary screw traps each trapping season.
+
+Objective 3: Estimate *O. mykiss* survival to Lower Granite Dam for each brood year and migratory year cohort.
+
+
+### Methods
+
+Annual *O. mykiss* abundance, $N_t$, at each site for trap year ($t$) is estimated using the stratified Bailey estimator (Steinhorst 2004), and summing across all trap seasons and strata ($h$).
+$$
+\hat{N_{t}} = \sum_{h}\frac{n1_h(n2_h+1)}{m2_h+1}
+$$
