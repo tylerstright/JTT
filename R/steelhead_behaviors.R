@@ -1,28 +1,53 @@
-# ==============================================================================
+# Steelhead Behaviors
 library(tidyverse)
 library(lubridate)
+library(cdmsR)
+library(cuyem)
 library(readxl)
 
-# Steelhead Scale Ages ----
+# Age Data ---- 
+# CDMS
+# age_cdms <- getDatasetView(80)
+# save(age_cdms, file = './data/dobos/age_cdms.rda')
+load(file = './data/dobos/age_cdms.rda')
+
+dupes <- age_cdms %>%
+  filter(Lifestage == 'Juvenile',
+         !is.na(PITCode),
+         PITCode != 'NA') %>%
+  group_by(PITCode) %>% tally() %>% filter(n==2)
+
+juv_cdms <- age_cdms %>%
+  filter(Lifestage == 'Juvenile',
+         !is.na(PITCode),
+         PITCode != 'NA',
+         !PITCode %in% dupes$PITCode) %>%
+  # select(PITCode, StreamAge, OceanAge, RepeatSpawner, TotalAge, EuropeanAge, AgeingComment)
+  select(NumPIT=PITCode, ScaleFinalAge=EuropeanAge) %>%
+  filter(NumPIT != 'N:A')
+
+# STH data from TH
 sth_ages <- read_excel('./data/dobos/NPT 32W Scale Age Data.xlsx') %>%
+  mutate(trap_month = month(CollectionDate),
+         trap_season = case_when(
+           trap_month %in% c(1:6) ~ 'Spring',
+           trap_month %in% c(7:8) ~ 'Summer',
+           trap_month %in% c(9:12) ~ 'Fall'
+         )) %>%
   filter(str_detect(Project, 'NPT'),
          LifeStage == 'Juvenile',
          !is.na(NumPIT),
          Species == 3,
          RearType == 'W',
-         CaptureMethod == 'SCREWT') %>%
-  select(CollectionDate, Project, StreamSection, ForkLengthmm, NumPIT, ScaleFinalAge)
+         CaptureMethod == 'SCREWT',
+         ScaleFinalAge != 'N:A') %>%
+  select(NumPIT, ScaleFinalAge) %>%
+  filter(!NumPIT %in% juv_cdms$NumPIT)
+# select(CollectionDate, Project, StreamSection, ForkLengthmm, NumPIT, ScaleFinalAge)
 
-sth_props <- sth_ages %>%
-  filter(!is.na(ScaleFinalAge)) %>%
-  mutate(year = year(CollectionDate)) %>%
-  group_by(year, ScaleFinalAge, StreamSection) %>%
-  summarize(n = n()) %>%
-  group_by(year, StreamSection) %>%
-  mutate(p = round(n/sum(n), 2)) %>%
-  pivot_wider(id_cols = c('year', 'StreamSection'), names_from = ScaleFinalAge, values_from = p)
+all_ages <- bind_rows(juv_cdms, sth_ages)
 
-# Read in PTAGIS data and prep ----
+# PTAGIS Data ----
 dobos <- read_csv('./data/dobos/Steelhead Dobos 2008-2020.csv') # PTAGIS query data
 
 names(dobos) <- tolower(gsub(' ', '_', names(dobos)))
@@ -48,11 +73,23 @@ data <- dobos %>%
          `trapyear+4` = if_else(trap_year==migratory_year-4, 1, 0),
          `trapyear+5` = if_else(trap_year==migratory_year-5, 1, 0),
          julian = yday(mark_date)
-         ) %>%
+  ) %>%
   mutate_at(.vars = c('migratory_year', 'trap_year', 'overwinters'), as.factor) %>%
   filter(overwinters != -1)  # only  one "-1" record
 
 data$trap_season <- factor(data$trap_season, levels = c('Summer', 'Fall', 'Spring'))
+
+ggplot(data, aes(x=mark_length_mm, y = overwinters)) + 
+  geom_jitter(height = 0.2, shape=21, aes(fill = trap_year), color = 'black') +
+  # facet_grid(trap_season~site_name) +
+  facet_grid(month_tagged~site_name) +
+  scale_fill_viridis_d(direction = -1) +
+  theme_bw() + xlab('Mark Length (mm)') + ylab('Migration Year')
+
+# PTAGIS combined with Age Data ----
+base_data <- data %>% 
+  left_join(all_ages, by=c('tag_code'='NumPIT'))
+
 
 dobos_tags <- left_join(sth_ages, data, by = c('NumPIT'='tag_code')) %>%
   filter(!is.na(ScaleFinalAge),
@@ -61,7 +98,11 @@ dobos_tags <- left_join(sth_ages, data, by = c('NumPIT'='tag_code')) %>%
   mutate(DTH = first_obs_date-release_date) %>%
   filter(!grepl('Lolo', StreamSection)) # Trap Filter
 
-# DOBOS PLOT ----
+# ptagis_withage <- data %>%
+#   left_join(sth_ages, by= c('tag_code'='NumPIT')) %>%
+#   left_join(juv_cdms, by= c('tag_code'='PITCode'))
+
+# DOBOS PLOT
 ggplot(dobos_tags, aes(x=mark_length_mm, y = DTH)) + #color?
   geom_point(shape = 21, aes(fill = overwinters), color = 'black') +
   facet_grid(trap_season~ScaleFinalAge) +
@@ -69,7 +110,7 @@ ggplot(dobos_tags, aes(x=mark_length_mm, y = DTH)) + #color?
   scale_y_continuous() +
   theme_bw()
 
- # length histo
+# length histo
 ggplot(dobos_tags, aes(x=mark_length_mm)) +
   geom_histogram(aes(x=mark_length_mm, fill=ScaleFinalAge), position='dodge', bins = 50) +
   scale_fill_viridis_d(direction=-1) +
@@ -78,6 +119,35 @@ ggplot(dobos_tags, aes(x=mark_length_mm)) +
   theme(plot.background = element_rect(fill='black'),
         panel.background = element_rect(fill='grey'))
 
+# Proportion Calculations ----
+season_props <- est_group_p(sth_ages, ScaleFinalAge, 0.5, trap_season, StreamSection)
+
+ggplot(season_props, aes(x=trap_season, y=p))+
+  geom_bar(stat = 'identity', aes(fill=ScaleFinalAge)) +
+  facet_wrap(~StreamSection) +
+  scale_fill_viridis_d()
+
+ggplot(season_props, aes(x=StreamSection, y=p))+
+  geom_bar(stat = 'identity', aes(fill=ScaleFinalAge)) +
+  facet_wrap(~trap_season) +
+  scale_fill_viridis_d()
+
+
+# proportions of fish by overwinter count and trap
+overwinter_props <- est_group_p(data, overwinters, 0.5, trap_year, site_name)
+# overwinter_props <- est_group_p(data, overwinters, 0.5, trap_season, site_name)
+
+ggplot(overwinter_props, aes(x=trap_year, y=p))+
+  geom_bar(stat = 'identity', aes(fill=overwinters)) +
+  facet_wrap(~site_name) +
+  scale_fill_viridis_d()
+
+ages_with <- left_join(sth_ages, data, by = c('NumPIT'='tag_code')) %>%
+  filter(!is.na(ScaleFinalAge),
+         !ScaleFinalAge %in% c('N:A', '5:0'),
+         !is.na(site_first_name)) %>%
+  mutate(DTH = first_obs_date-release_date) %>%
+  filter(!grepl('Lolo', StreamSection)) # Trap Filter
 
 # DOBOS - Ty's method that changes Y axis to "MY" in relation to "TY" (trap year) ----
 dobos_tags_tymy <- data %>%
@@ -106,16 +176,3 @@ ggplot(dobos_tags_tymy, aes(x=julian, y = mark_length_mm)) +
   # facet_grid(month_tagged~ScaleFinalAge) +  
   scale_color_viridis_d(direction = -1) +
   theme_bw() 
-
-ggsave(filename = './images/dobos_tymy.png', height = 10, width = 15)
-
-# No Ages
-ggplot(data, aes(x=mark_length_mm, y = overwinters)) + 
-  geom_jitter(height = 0.2, shape=21, aes(fill = trap_year), color = 'black') +
-  # facet_grid(trap_season~site_name) +
-  facet_grid(month_tagged~site_name) +
-  scale_fill_viridis_d(direction = -1) +
-  theme_bw() + xlab('Mark Length (mm)') + ylab('Migration Year')
-
-
-
