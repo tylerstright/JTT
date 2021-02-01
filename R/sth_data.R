@@ -1,4 +1,9 @@
 # Steelhead data to investigate migration behaviors
+library(tidyverse)
+library(lubridate)
+library(cdmsR)
+library(cuyem)
+library(readxl)
 
 # Get age data from CDMS ---- 
   # cdmsLogin(username='',password='') # don't save your credentials to github :)
@@ -80,3 +85,9 @@ sth_data <- ptagis %>%
 rm(all_ages, ptagis)
 
 save(sth_data, file = './data/dobos/sth_data.rda')
+
+sth_data_ages <- sth_data %>%
+  filter(!is.na(ScaleFinalAge),
+         ScaleFinalAge != 'N:A')
+
+save(sth_data_ages, file = './data/dobos/sth_data_ages.rda')
