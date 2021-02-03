@@ -11,7 +11,7 @@ load('./data/allObs.rda')
 # get first obs and plot
 mod_dat %>%
   ggplot(aes(x = length, y = overwinter, colour = as.factor(release_year))) +
-  geom_jitter(alpha = .25) +
+  geom_jitter() +
   facet_grid(tag_season ~ release_site) +
   labs(x = 'Fork Length at Tagging',
        y = 'Overwinters from Tagging')

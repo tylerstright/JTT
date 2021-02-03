@@ -32,7 +32,8 @@ mod_dat <- allObs %>%
   filter(total_rkm <= 695) %>% # obs at mainstem hydrosystem only; eliminate IPTDS
   filter(between(release_year, 2010, 2017)) %>% # filter to get release years with complete migration year potential
   group_by(tag_id) %>%
-  slice(which.min(obs_time))
+  slice(which.min(obs_time)) %>%
+  ungroup()
 
 save(allObs, mod_dat, file = './data/allObs.rda')
 
