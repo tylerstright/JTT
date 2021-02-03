@@ -25,3 +25,5 @@ PIT_obs <- cross2(release_sites, yrs) %>%
            end_date = paste0('12/31/',.$year))
        }
   )
+
+save(PIT_obs, file = './data/dart_pit_obs.rda')
