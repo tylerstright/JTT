@@ -1,6 +1,7 @@
 library(cuyem)
 library(tidyverse)
 library(lubridate)
+library(viridis)
 library(fisheR)
 
 # load data - queried from DART
@@ -18,7 +19,7 @@ spsu_sites <- dart_my20 %>%
   pull(release_site)
 
 spsu_colors <- data.frame(
-  release_site = spsu_sites, 
+  release_site = sort(spsu_sites), 
   plot_colors = viridis(n=length(spsu_sites))
 )
 
@@ -29,7 +30,7 @@ fall_groups <- dart_my20 %>%
   pull(unique(release_groups))
 
 fall_colors <- data.frame(
-  release_groups = fall_groups, 
+  release_groups = sort(fall_groups), 
   plot_colors = viridis(n=length(fall_groups))
 )
 
