@@ -108,6 +108,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site == 'NPTH' & tag_file %in% c('SCS-2020-070-NP1.XML','SCS-2020-070-NP2.XML') ~ '11H NPTH Spring Chinook',
     release_site %in% c('IMNAHR','IMNAHW') ~ '11H Imnaha',  
     release_site == 'LOSTIP' ~ '11H Lostine',
+    release_site == 'JOHNSC' ~ '12H JC',
     # SUMMER STEELHEAD
     release_site == 'CLWRSF' & tag_file %in% c('CBB-2020-008-006.XML','CBB-2020-008-007.XML', 
                                                paste0('BDL-2019-275-W', c(15,16,25,26,35,36,45,46), '.XML')) ~ '32H Red House Hole (SFC)',

@@ -52,7 +52,7 @@ ggplot(dart_my20 %>% filter(species == 'Steelhead'),
        color='Release Site', linetype='Operations')+
   ggtitle('Summer Steelhead: arrival timing at LGR')
 
-ggsave(filename = './data/arrival/sth_my20.png', width = 8, height = 5)
+ggsave(filename = './data/arrival/sth_my20.png', width = 10, height = 7)
 
 # Chinook ----
 ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run != 'Fall', 
@@ -72,7 +72,7 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run != 'Fall',
        color='Release Site', linetype='Operations') +
   ggtitle('Spring/summer Chinook salmon: arrival timing at LGR')
 
-ggsave(filename = './data/arrival/schn_my20.png', width = 8, height = 5)
+ggsave(filename = './data/arrival/schn_my20.png', width = 10, height = 7)
 
 
 # Fall Chinook ----
@@ -91,4 +91,4 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run == 'Fall'),
        color='Release Site', linetype='Operations') +
   ggtitle('Fall Chinook salmon: arrival timing at LGR')
 
-ggsave(filename = './data/arrival/fchn_my20.png', width = 8, height = 5)
+ggsave(filename = './data/arrival/fchn_my20.png', width = 10, height = 7)
