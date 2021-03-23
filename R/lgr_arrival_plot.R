@@ -15,13 +15,15 @@ summer_spill <- ymd('2020-06-21')
 # Colors for S_CHN and S_STH plots
 spsu_sites <- dart_my20 %>%
   filter(run != 'Fall') %>%
-  distinct(release_site) %>%
-  pull(release_site)
+  distinct(release_site_plotnames) %>%
+  pull(release_site_plotnames)
 
 spsu_colors <- data.frame(
-  release_site = sort(spsu_sites), 
+  release_site_plotnames = sort(spsu_sites), 
   plot_colors = viridis(n=length(spsu_sites))
 )
+
+# write_csv(spsu_colors, file = './data/arrival/spsu_colors.csv')
 
 # Colors for F_CHN plots
 fall_groups <- dart_my20 %>%
@@ -34,10 +36,11 @@ fall_colors <- data.frame(
   plot_colors = viridis(n=length(fall_groups))
 )
 
+# write_csv(fall_colors, file = './data/arrival/fall_colors.csv')
 
 # Steelhead ----
 ggplot(dart_my20 %>% filter(species == 'Steelhead'), 
-       aes(x=obs_date, color=release_site)) + 
+       aes(x=obs_date, color=release_site_plotnames)) + 
   geom_vline(aes(xintercept = spring_spill, linetype = 'Spring spill')) +
   geom_vline(aes(xintercept = transport_start, linetype ='Transport')) +
   stat_ecdf(size=1) +
@@ -45,7 +48,7 @@ ggplot(dart_my20 %>% filter(species == 'Steelhead'),
   scale_x_date(name='Date', labels = scales::date_format('%m/%d/%y'), date_breaks='month') +  
   theme_bw() +  
   # scale_color_viridis_d(direction=-1) +
-  scale_color_manual(breaks= spsu_colors$release_site,
+  scale_color_manual(breaks= spsu_colors$release_site_plotnames,
                      values = spsu_colors$plot_colors) +
   theme(panel.grid.minor = element_blank()) +
   labs(y='Cumulative Proportion',
@@ -57,7 +60,7 @@ ggsave(filename = './data/arrival/sth_my20.png', width = 10, height = 7)
 # Chinook ----
 ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run != 'Fall', 
                             !plot_group %in% c('Hatchery - Snake River','Hatchery - Clearwater River', 'Natural - Clearwater River')),
-        aes(x=obs_date, color=release_site)) + 
+        aes(x=obs_date, color=release_site_plotnames)) + 
   geom_vline(aes(xintercept = spring_spill, linetype = 'Spring Spill')) +
   geom_vline(aes(xintercept = transport_start, linetype ='Transport')) +
   stat_ecdf(size=1) +
@@ -65,7 +68,7 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run != 'Fall',
   scale_x_date(name = 'Date', labels = scales::date_format('%m/%d/%y'), date_breaks='month') + 
   theme_bw() +  
   # scale_color_viridis_d(direction=-1) +
-  scale_color_manual(breaks= spsu_colors$release_site,
+  scale_color_manual(breaks= spsu_colors$release_site_plotnames,
                      values = spsu_colors$plot_colors) +
   theme(panel.grid.minor = element_blank()) +
   labs(y = list(title='Cumulative Proportion'),
