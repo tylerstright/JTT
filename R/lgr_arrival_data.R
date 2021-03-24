@@ -114,7 +114,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
                                                paste0('BDL-2019-275-W', c(15,16,25,26,35,36,45,46), '.XML')) ~ '32H Red House Hole (SFC)',
     release_site == 'MEAD2C' & tag_file %in% c(paste0('BDL-2019-275-W', c(11:14,21:24,31:34,41:44),'.XML')) ~ '32H Meadow Creek (SFC)', # SF Clearwater / Meadow Creek
     release_site == 'NEWSOC' & tag_file %in% c(paste0('BDL-2019-276-W', c(11,12,21,22,31,32,41,42),'.XML')) ~ '32H Newsome Creek (SFC)',
-    release_site == 'LSHEEF' ~ '32H Little Sheep',
+    release_site == 'LSHEEF' & year(release_date) == 2020 ~ '32H Little Sheep',
     TRUE ~ 'Unassigned')) %>%
   # Groups for plots
   mutate(plot_group = case_when(
