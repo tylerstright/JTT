@@ -80,7 +80,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
   mutate(release_groups = case_when(
     # Beach Seining
     release_site == 'CLWR' & tag_coord == 'BDA' & between(release_date, sein_start, sein_end) ~ 'Clearwater Naturals', #13W Beach Sein - NPT', # BA as tag coordinator. Fall Chinook.
-    release_site == 'CLWR' & tag_coord == 'WPC' & release_year == 2020 ~ 'Clearwater Naturals - USGS', #'13W Beach Sein - USGS', #& release_date == ymd('2020-07-06')  # USGS contribution (worked with NPT on 7/6/20)
+    release_site == 'CLWR' & tag_coord == 'WPC' & release_year == 2020 ~ 'Clearwater Naturals', #'13W Beach Sein - USGS', #& release_date == ymd('2020-07-06')  # USGS contribution (worked with NPT on 7/6/20)
     # release_site == 'CLWRSF' & tag_coord == 'BDA' & between(release_date, mdy('07-09-2020'), mdy('07-16-2020')) ~ 'SF Clearwater Beach Sein',# BDA = Billy Arnsberg (SF Beach Seining)
     # RST
     release_site == 'IMNTRP' & between(release_date, imntrp_start, imntrp_end) ~ 'Imnaha River RST', 
