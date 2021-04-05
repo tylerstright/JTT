@@ -12,11 +12,29 @@ transport_start <- ymd('2020-04-23') # begin barge collections
 spring_spill <- ymd('2020-04-03') # (https://www.fpc.org/WebForm2013/includes/Metadatafor2020VoluntarySpillWeb.pdf)
 summer_spill <- ymd('2020-06-21')
 
+# AAA <- spsu_sites2 <- dart_my20 %>%
+#   filter(run != 'Fall') %>%
+#   group_by(release_site, release_site_plotnames) %>%
+#   distinct(release_site) %>%
+#   mutate(Species = 'Spring Chinook and/or Steelhead')
+# 
+# BBB <- dart_my20 %>%
+#   filter(run == 'Fall') %>%
+#   group_by(release_site, release_groups) %>%
+#   distinct(release_site) %>%
+#   mutate(Species = 'Fall Chinook')
+# 
+# allgrps <- bind_rows(AAA, BBB)
+# 
+# write_csv(allgrps, file = './data/arrival/JTT_groups.csv')
+
+
 # Colors for S_CHN and S_STH plots
 spsu_sites <- dart_my20 %>%
   filter(run != 'Fall') %>%
   distinct(release_site_plotnames) %>%
   pull(release_site_plotnames)
+
 
 spsu_colors <- data.frame(
   release_site_plotnames = sort(spsu_sites), 

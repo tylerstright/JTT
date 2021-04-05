@@ -5,7 +5,7 @@ library(lubridate)
 # lists
 migration_year <- '2020'
 lgr_sites <- c('GRJ', 'GRA', 'GRS')  #(for obs_site filter: juv, adult, spill)
-npth_chinook_sites <- c('BCCAP', 'CEFLAF', 'CJRAP', 'NLVP', 'LUGUAF', 'NPTH', 'PLAP', 'KOOS', 'MEADOC', 'NEWSOC') 
+npth_chinook_sites <- c('BCCAP', 'CEFLAF', 'CJRAP', 'NLVP', 'LUGUAF', 'NPTH', 'PLAP', 'KOOS', 'MEADOC', 'NEWSOC')
 steelhead_sites <- c('IMNTRP','LSHEEF', 'JOHTRP', 'SECTRP', 'LOLOC', 'CLWRSF', 'NEWSOC','MEAD2C')
 chinook_sites <- c('IMNTRP', 'IMNAHR', 'IMNAHW', 'JOHTRP', 'JOHNSC', 'SECTRP', 'LOLOC', 'CLWRSF',
                    'LOSTIP', 'LOSTIR', 'CLWR', npth_chinook_sites)
@@ -79,42 +79,46 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
   # Assign Release Groups
   mutate(release_groups = case_when(
     # Beach Seining
-    release_site == 'CLWR' & tag_coord == 'BDA' & between(release_date, sein_start, sein_end) ~ 'Clearwater Naturals', #13W Beach Sein - NPT', # BA as tag coordinator. Fall Chinook.
-    release_site == 'CLWR' & tag_coord == 'WPC' & release_year == 2020 ~ 'Clearwater Naturals', #'13W Beach Sein - USGS', #& release_date == ymd('2020-07-06')  # USGS contribution (worked with NPT on 7/6/20)
-    # release_site == 'CLWRSF' & tag_coord == 'BDA' & between(release_date, mdy('07-09-2020'), mdy('07-16-2020')) ~ 'SF Clearwater Beach Sein',# BDA = Billy Arnsberg (SF Beach Seining)
+    release_site == 'CLWR' & tag_coord == 'BDA' & between(release_date, sein_start, sein_end) ~ 'CLRWBS', #13W Beach Sein - NPT', # BA as tag coordinator. Fall Chinook.
+    release_site == 'CLWR' & tag_coord == 'WPC' & release_year == 2020 ~ 'CLRWBS', #'13W Beach Sein - USGS', #& release_date == ymd('2020-07-06')  # USGS contribution (worked with NPT on 7/6/20)
+    release_site == 'CLWRSF' & tag_coord == 'BDA' & tag_file %in% c(paste0('BDA-2020-', c(191,195,196,198),'-SF1.XML'),
+                                                                    paste0('BDA-2020-', c(195,196,198),'-SF2.XML')) ~ 'SFCWBS',
+        # & between(release_date, mdy('07-09-2020'), mdy('07-16-2020')) ~ 'SF Clearwater Beach Sein',# BDA = Billy Arnsberg (SF Beach Seining)
+    
     # RST
-    release_site == 'IMNTRP' & between(release_date, imntrp_start, imntrp_end) ~ 'Imnaha River RST', 
-    release_site == 'JOHTRP' & between(release_date, johtrp_start, johtrp_end) ~ 'Johnson Creek RST', 
-    release_site == 'SECTRP' & between(release_date, sectrp_start, sectrp_end) ~ 'Secesh River RST',
-    release_site == 'CLWRSF' & tag_coord == 'NPC' & between(release_date, clwrsf_start, clwrsf_end) ~ 'South Fork Clearwater River RST', # NPC = Nez Perce Clearwater (SF RST)
-    release_site == 'LOLOC' & tag_file != 'SCS-2019-211-LC1.XML' & between(release_date, loloc_start, loloc_end) ~ 'Lolo Creek RST', # LC1.XML=11H release
+    release_site == 'IMNTRP' & between(release_date, imntrp_start, imntrp_end) ~ 'IMNTRP', 
+    release_site == 'JOHTRP' & between(release_date, johtrp_start, johtrp_end) ~ 'JOHTRP', 
+    release_site == 'SECTRP' & between(release_date, sectrp_start, sectrp_end) ~ 'SECTRP',
+    release_site == 'CLWRSF' & tag_coord == 'NPC' & between(release_date, clwrsf_start, clwrsf_end) ~ 'SFCTRP', # NPC = Nez Perce Clearwater (SF RST)
+    release_site == 'LOLOC' & tag_file != 'SCS-2019-211-LC1.XML' & between(release_date, loloc_start, loloc_end) ~ 'LOLTRP', # LC1.XML=11H release
     release_site == 'LOSTIR' & between(release_date, mdy('07/01/2019'), mdy('06/30/2020')) ~ 'Lostine Naturals',
     # FALL CHINOOK
-    release_site == 'BCCAP' & tag_file == 'SCS-2020-107-BC1.XML' ~ 'Big Canyon Creek 1st', # 13H
-    release_site == 'BCCAP' & tag_file == 'SCS-2020-126-BC2.XML' ~ 'Big Canyon Creek 2nd', # 13H
-    release_site == 'CEFLAF' & tag_file == 'SCS-2020-133-CF1.XML' ~ 'Cedar Flats', # 13H
-    release_site == 'CJRAP' & tag_file == 'SCS-2020-113-CJ1.XML' ~ "Captain John Rapids 1st", # 13H
-    release_site == 'CJRAP' & tag_file == 'SCS-2020-127-CJ2.XML' ~ "Captain John Rapids 2nd", # 13H
-    release_site == 'LUGUAF' & tag_file == 'SCS-2020-132-LG1.XML' ~ "Lukes Gulch", # 13H
-    release_site == 'NLVP' & tag_file == 'SCS-2020-114-NLV.XML' ~ 'North Lapwai Valley', # 13H
-    release_site == 'NPTH' & tag_file == 'SCS-2020-135-OS1.XML' ~ 'NPTH On Station',  # 13H
-    release_site == 'PLAP' & tag_file == 'SCS-2020-106-PL1.XML' ~ 'Pittsburg Landing 1st', # 13H
-    release_site == 'PLAP' & tag_file == 'SCS-2020-125-PL2.XML' ~ 'Pittsburg Landing 2nd', # 13H
+    release_site == 'BCCAP' & tag_file == 'SCS-2020-107-BC1.XML' ~ 'BCCAP I', # 13H
+    release_site == 'BCCAP' & tag_file == 'SCS-2020-126-BC2.XML' ~ 'BCCAP II', # 13H
+    release_site == 'CEFLAF' & tag_file == 'SCS-2020-133-CF1.XML' ~ 'CEFLAF', # 13H
+    release_site == 'CJRAP' & tag_file == 'SCS-2020-113-CJ1.XML' ~ "CJRAP I", # 13H
+    release_site == 'CJRAP' & tag_file == 'SCS-2020-127-CJ2.XML' ~ "CJRAP II", # 13H
+    release_site == 'LUGUAF' & tag_file == 'SCS-2020-132-LG1.XML' ~ "LUGUAF", # 13H
+    release_site == 'NLVP' & tag_file == 'SCS-2020-114-NLV.XML' ~ 'NLVP', # 13H
+    release_site == 'NPTH' & tag_file == 'SCS-2020-135-OS1.XML' ~ 'NPTH',  # 13H
+    release_site == 'PLAP' & tag_file == 'SCS-2020-106-PL1.XML' ~ 'PLAP I', # 13H
+    release_site == 'PLAP' & tag_file == 'SCS-2020-125-PL2.XML' ~ 'PLAP II', # 13H
     # SPRING CHINOOK
-    release_site == 'KOOS' & tag_file == 'SCS-2019-282-002.XML' ~ '11H KNFH',
-    release_site == 'LOLOC' & tag_file == 'SCS-2019-211-LC1.XML' ~ '11H Lolo Creek',
-    release_site == 'MEADOC' & tag_file == 'SCS-2019-169-MC1.XML' ~ '11H Meadow Creek (MF Salmon)', # MF Salmon / Meadow Creek
-    release_site == 'NEWSOC' & tag_file == 'SCS-2019-211-NC1.XML' ~ '11H Newsome Creek', 
-    release_site == 'NPTH' & tag_file %in% c('SCS-2020-070-NP1.XML','SCS-2020-070-NP2.XML') ~ '11H NPTH Spring Chinook',
-    release_site %in% c('IMNAHR','IMNAHW') ~ '11H Imnaha',  
-    release_site == 'LOSTIP' ~ '11H Lostine',
-    release_site == 'JOHNSC' ~ '12H JC',
+    release_site == 'KOOS' & tag_file == 'SCS-2019-282-002.XML' ~ 'KNFH', # 11H
+    release_site == 'LOLOC' & tag_file == 'SCS-2019-211-LC1.XML' ~ 'LOLOCY', # 11H Yoosa creek release
+    release_site == 'MEADOC' & tag_file == 'SCS-2019-169-MC1.XML' ~ 'MEADOC', # MF Salmon / Meadow Creek
+    release_site == 'NEWSOC' & tag_file == 'SCS-2019-211-NC1.XML' ~ 'NEWSOC',  # 11H 
+    release_site == 'NPTH' & tag_file %in% c('SCS-2020-070-NP1.XML','SCS-2020-070-NP2.XML') ~ 'NPTH', # 11H
+    release_site %in% c('IMNAHR','IMNAHW') ~ 'IMNHSC', # 11H  
+    release_site == 'LOSTIP' ~ 'LOSTIP', # 11H
+    release_site == 'JOHNSC' ~ 'JOHNSC', # 12H
     # SUMMER STEELHEAD
     release_site == 'CLWRSF' & tag_file %in% c('CBB-2020-008-006.XML','CBB-2020-008-007.XML', 
-                                               paste0('BDL-2019-275-W', c(15,16,25,26,35,36,45,46), '.XML')) ~ '32H Red House Hole (SFC)',
-    release_site == 'MEAD2C' & tag_file %in% c(paste0('BDL-2019-275-W', c(11:14,21:24,31:34,41:44),'.XML')) ~ '32H Meadow Creek (SFC)', # SF Clearwater / Meadow Creek
-    release_site == 'NEWSOC' & tag_file %in% c(paste0('BDL-2019-276-W', c(11,12,21,22,31,32,41,42),'.XML')) ~ '32H Newsome Creek (SFC)',
-    release_site == 'LSHEEF' & year(release_date) == 2020 ~ '32H Little Sheep',
+                                               paste0('BDL-2019-275-W', c(15,16,25,26,35,36,45,46), '.XML')) ~ 'REDHOS', # 32H Red House Hole (SFC)',
+    release_site == 'MEAD2C' & tag_file %in% c(paste0('BDL-2019-275-W', c(11:14,21:24,31:34,41:44),'.XML')) ~ 'MEAD2C', # 32H Meadow Creek (SFC)', # SF Clearwater / Meadow Creek
+    release_site == 'NEWSOC' & tag_file %in% c(paste0('BDL-2019-276-W', c(11,12,21,22,31,32,41,42),'.XML')) ~ 'NEWSOC', #'32H Newsome Creek (SFC)',
+    release_site == 'LSHEEF' & year(release_date) == 2020 ~ 'LSHEEF', # 32H
+    release_site == 'LOLOC' & sprrt == '32H' ~ 'LOLOCE', # at Eldorado
     TRUE ~ 'Unassigned')) %>%
   # Groups for plots
   mutate(plot_group = case_when(
@@ -132,21 +136,23 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     species == 'Steelhead' & month(release_date) %in% c(7:12) ~ 'Summer/Fall tagged'
   )) %>%
   mutate(release_site_plotnames = case_when(
-    release_site == 'IMNTRP' ~ 'Imnaha River RST',
-    release_site == 'LSHEEF' ~ 'Little Sheep Acclimation Facility',
-    release_site == 'JOHTRP' ~ 'Johnson Creek RST',
-    release_site == 'JOHNSC' ~ 'Johnson Creek',
-    release_site == 'SECTRP' ~ 'Secesh River RST',
-    release_groups == 'Lolo Creek RST' ~ release_groups,
-    release_groups == '11H Lolo Creek' ~ 'Lolo Creek at Eldorado Creek Mouth',
-    release_site == 'CLWRSF' ~ 'South Fork Clearwater RST',
-    release_site == 'NEWSOC' ~ 'Newsome Creek',
-    release_site == 'MEAD2C' ~ 'Meadow Creek (SF Clearwater)',
-    release_site %in% c('IMNAHW', 'IMNAHR') ~ 'Imnaha River',
-    release_site %in% c('LOSTIR', 'LOSTIP') ~ 'Lostine River',
-    release_site == 'NPTH' ~ 'NPTH On Station',
-    release_site == 'KOOS' ~ 'Kooskia Fish Hatchery',
-    release_site == 'MEADOC' ~ 'Meadow Creek (Selway)',
+    release_site == 'IMNTRP' ~ 'IMNTRP', #'Imnaha River RST',
+    release_site == 'LSHEEF' ~ 'LSHEEF', #'Little Sheep Acclimation Facility',
+    release_site == 'JOHTRP' ~ 'JOHTRP', #'Johnson Creek RST',
+    release_site == 'JOHNSC' ~ 'JOHNSC', #'Johnson Creek',
+    release_site == 'SECTRP' ~ 'SECTRP', #'Secesh River RST',
+    release_groups == 'LOLTRP' ~ release_groups, 
+    release_groups == '11H Lolo Creek' ~ 'LOLOCE', #'Lolo Creek at Eldorado Creek Mouth',
+    release_site == 'CLWRSF' ~ 'SFCTRP', #'South Fork Clearwater RST',
+    release_site == 'NEWSOC' ~ 'NEWSOC', #'Newsome Creek',
+    release_site == 'MEAD2C' ~ 'MEAD2C', #'Meadow Creek (SF Clearwater)',
+    release_site %in% c('IMNAHW', 'IMNAHR') ~ 'IMNHSC',
+    release_site %in% c('LOSTIR', 'LOSTIP') ~ 'Lostine River', # these are split by the ggplot facet_wrap into hatchery and natural
+    release_site == 'NPTH' ~ 'NPTH',
+    release_site == 'KOOS' ~ 'KNFH',
+    release_site == 'MEADOC' ~ 'MEADOC',
+    release_groups == 'LOLOCY' ~ 'LOLOCY',
+    release_groups == 'LOLOCE' ~ 'LOLOCE',
     TRUE ~ paste0('WHAA_', release_site))
   ) %>%
   # FILTERS
@@ -154,7 +160,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
          stage == 'J') %>% # only Juvenile records
   filter(case_when(
     release_site %in% c('IMNTRP','JOHTRP','SECTRP') ~ sprrt %in% c('12W', '32W'),
-    release_groups == 'Lolo RST' ~ sprrt %in% c('11W','32W'),
+    release_groups == 'LOLTRP' ~ sprrt %in% c('11W','32W'),
     release_site %in% c('IMNAHW','IMNAHR') ~ sprrt == '11H', # this removes the ODFW ELH 11W's from IMNAHR
     TRUE ~ sprrt == sprrt
   )) %>%
