@@ -81,8 +81,8 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     # Beach Seining
     release_site == 'CLWR' & tag_coord == 'BDA' & between(release_date, sein_start, sein_end) ~ 'CLRWBS', #13W Beach Sein - NPT', # BA as tag coordinator. Fall Chinook.
     release_site == 'CLWR' & tag_coord == 'WPC' & release_year == 2020 ~ 'CLRWBS', #'13W Beach Sein - USGS', #& release_date == ymd('2020-07-06')  # USGS contribution (worked with NPT on 7/6/20)
-    release_site == 'CLWRSF' & tag_coord == 'BDA' & tag_file %in% c(paste0('BDA-2020-', c(191,195,196,198),'-SF1.XML'),
-                                                                    paste0('BDA-2020-', c(195,196,198),'-SF2.XML')) ~ 'SFCWBS',
+    # release_site == 'CLWRSF' & tag_coord == 'BDA' & tag_file %in% c(paste0('BDA-2020-', c(191,195,196,198),'-SF1.XML'),
+    #                                                                 paste0('BDA-2020-', c(195,196,198),'-SF2.XML')) ~ 'SFCWBS', # ONLY ONE RECORD!***********
         # & between(release_date, mdy('07-09-2020'), mdy('07-16-2020')) ~ 'SF Clearwater Beach Sein',# BDA = Billy Arnsberg (SF Beach Seining)
     
     # RST
@@ -90,7 +90,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site == 'JOHTRP' & between(release_date, johtrp_start, johtrp_end) ~ 'JOHTRP', 
     release_site == 'SECTRP' & between(release_date, sectrp_start, sectrp_end) ~ 'SECTRP',
     release_site == 'CLWRSF' & tag_coord == 'NPC' & between(release_date, clwrsf_start, clwrsf_end) ~ 'SFCTRP', # NPC = Nez Perce Clearwater (SF RST)
-    release_site == 'LOLOC' & tag_file != 'SCS-2019-211-LC1.XML' & between(release_date, loloc_start, loloc_end) ~ 'LOLTRP', # LC1.XML=11H release
+    release_site == 'LOLOC' & tag_file != 'SCS-2019-211-LC1.XML' & between(release_date, loloc_start, loloc_end) & sprrt !='32H'~ 'LOLTRP', # LC1.XML=11H release
     release_site == 'LOSTIR' & between(release_date, mdy('07/01/2019'), mdy('06/30/2020')) ~ 'Lostine Naturals',
     # FALL CHINOOK
     release_site == 'BCCAP' & tag_file == 'SCS-2020-107-BC1.XML' ~ 'BCCAP I', # 13H
@@ -107,7 +107,8 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site == 'KOOS' & tag_file == 'SCS-2019-282-002.XML' ~ 'KNFH', # 11H
     release_site == 'LOLOC' & tag_file == 'SCS-2019-211-LC1.XML' ~ 'LOLOCY', # 11H Yoosa creek release
     release_site == 'MEADOC' & tag_file == 'SCS-2019-169-MC1.XML' ~ 'MEADOC', # MF Salmon / Meadow Creek
-    release_site == 'NEWSOC' & tag_file == 'SCS-2019-211-NC1.XML' ~ 'NEWSOC',  # 11H 
+    # release_site == 'NEWSOC' & tag_file == 'SCS-2019-211-NC1.XML' ~ 'NEWSOC',  # 11H 
+    release_site == 'NEWSOC' & sprrt=='11H' ~ 'NEWSAF',  # 11H 
     release_site == 'NPTH' & tag_file %in% c('SCS-2020-070-NP1.XML','SCS-2020-070-NP2.XML') ~ 'NPTH', # 11H
     release_site %in% c('IMNAHR','IMNAHW') ~ 'IMNHSC', # 11H  
     release_site == 'LOSTIP' ~ 'LOSTIP', # 11H
@@ -143,16 +144,20 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site == 'SECTRP' ~ 'SECTRP', #'Secesh River RST',
     release_groups == 'LOLTRP' ~ release_groups, 
     release_groups == '11H Lolo Creek' ~ 'LOLOCE', #'Lolo Creek at Eldorado Creek Mouth',
-    release_site == 'CLWRSF' ~ 'SFCTRP', #'South Fork Clearwater RST',
-    release_site == 'NEWSOC' ~ 'NEWSOC', #'Newsome Creek',
+    release_groups == 'SFCTRP' ~ 'SFCTRP', #'South Fork Clearwater RST',
+    release_groups == 'NEWSOC' ~ 'NEWSOC', #'Newsome Creek',
+    release_groups == 'NEWSAF' ~ 'NEWSAF',
     release_site == 'MEAD2C' ~ 'MEAD2C', #'Meadow Creek (SF Clearwater)',
     release_site %in% c('IMNAHW', 'IMNAHR') ~ 'IMNHSC',
-    release_site %in% c('LOSTIR', 'LOSTIP') ~ 'Lostine River', # these are split by the ggplot facet_wrap into hatchery and natural
+    # release_site %in% c('LOSTIR', 'LOSTIP') ~ 'Lostine River', # these are split by the ggplot facet_wrap into hatchery and natural
+    release_site == 'LOSTIR' ~ 'LOSTIR',
+    release_site == 'LOSTIP' ~ 'LOSTIP',
     release_site == 'NPTH' ~ 'NPTH',
     release_site == 'KOOS' ~ 'KNFH',
     release_site == 'MEADOC' ~ 'MEADOC',
     release_groups == 'LOLOCY' ~ 'LOLOCY',
     release_groups == 'LOLOCE' ~ 'LOLOCE',
+    release_groups == 'REDHOS' ~ 'REDHOS',
     TRUE ~ paste0('WHAA_', release_site))
   ) %>%
   # FILTERS
@@ -164,7 +169,8 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site %in% c('IMNAHW','IMNAHR') ~ sprrt == '11H', # this removes the ODFW ELH 11W's from IMNAHR
     TRUE ~ sprrt == sprrt
   )) %>%
-  filter(release_groups != 'Unassigned')
+  filter(release_groups != 'Unassigned',
+         release_site != 'LOSTIR')
 
 dart_my20$plot_group <- factor(dart_my20$plot_group, levels= c('Parr','Summer/Fall tagged','Presmolt','Smolt','Hatchery',
                                                                'Snake River','Clearwater River'))
