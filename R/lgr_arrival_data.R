@@ -160,6 +160,24 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_groups == 'REDHOS' ~ 'REDHOS',
     TRUE ~ paste0('WHAA_', release_site))
   ) %>%
+  # ADDING LIFESTAGE - for facet_wrap STH and SCHN (not fall, which is stream)
+  mutate(lifestage = case_when(
+    # Fall Chinook fall shouldn't matter for plots.
+    run == 'Fall' ~ 'FALL',
+    # Hatchery (non-fall)
+    rear == 'Hatchery' & release_groups %in% c('KNFH', 'NPTH', 'IMNHSC', 'LSHEEF', 'JOHNSC', 'LOLOCE', 'LOSTIP', 
+                                               'MEAD2C', 'NEWSOC', 'REDHOS') ~ 'Smolt',
+    rear == 'Hatchery' & release_groups %in% c('MEADOC') ~ 'Parr',
+    rear == 'Hatchery' & release_groups %in% c('LOLOCY', 'NEWSAF') ~ 'Presmolt',
+    rear == 'Hatchery' & rear == 'Fall' ~ 'Subyearling',
+    # Spring/summer Chinook
+    species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(1:6) ~ 'Smolt',
+    species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(7:8) ~ 'Parr',
+    species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(9:12) ~ 'Presmolt',  
+    # Summer Steelhead
+    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(1:6) ~ 'Smolt',
+    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(7:12) ~ 'Summer/Fall tagged'
+  )) %>%
   # FILTERS
   filter(obs_site %in% lgr_sites, # only LGR observation sites
          stage == 'J') %>% # only Juvenile records
@@ -174,6 +192,8 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
 
 dart_my20$plot_group <- factor(dart_my20$plot_group, levels= c('Parr','Summer/Fall tagged','Presmolt','Smolt','Hatchery',
                                                                'Snake River','Clearwater River'))
-  
+
 save(dart_my20, file='./data/arrival/dart_my20.rda')
 # load(file='./data/arrival/dart_my20.rda')
+
+rm(list = ls())
