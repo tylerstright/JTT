@@ -162,8 +162,6 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
   ) %>%
   # ADDING LIFESTAGE - for facet_wrap STH and SCHN (not fall, which is stream)
   mutate(lifestage = case_when(
-    # Fall Chinook fall shouldn't matter for plots.
-    run == 'Fall' ~ 'FALL',
     # Hatchery (non-fall)
     rear == 'Hatchery' & release_groups %in% c('KNFH', 'NPTH', 'IMNHSC', 'LSHEEF', 'JOHNSC', 'LOLOCE', 'LOSTIP', 
                                                'MEAD2C', 'NEWSOC', 'REDHOS') ~ 'Smolt',
@@ -191,7 +189,9 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
          release_site != 'LOSTIR')
 
 dart_my20$plot_group <- factor(dart_my20$plot_group, levels= c('Parr','Summer/Fall tagged','Presmolt','Smolt','Hatchery',
-                                                               'Snake River','Clearwater River'))
+                                                               'Clearwater River','Snake River'))
+
+dart_my20$lifestage <- factor(dart_my20$lifestage, levels= c("Parr", "Summer/Fall tagged","Presmolt","Smolt", "Subyearling"))
 
 save(dart_my20, file='./data/arrival/dart_my20.rda')
 # load(file='./data/arrival/dart_my20.rda')
