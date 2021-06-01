@@ -133,8 +133,8 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     species == 'Chinook salmon' & month(release_date) %in% c(7:8) ~ 'Parr',
     species == 'Chinook salmon' & month(release_date) %in% c(9:12) ~ 'Presmolt',  
     # Summer Steelhead
-    species == 'Steelhead' & month(release_date) %in% c(1:6) ~ 'Smolt',
-    species == 'Steelhead' & month(release_date) %in% c(7:12) ~ 'Summer/Fall tagged'
+    species == 'Steelhead' & month(release_date) %in% c(1:6) ~ 'Winter/Spring',
+    species == 'Steelhead' & month(release_date) %in% c(7:12) ~ 'Summer/Fall'
   )) %>%
   mutate(release_site_plotnames = case_when(
     release_site == 'IMNTRP' ~ 'IMNTRP', #'Imnaha River RST',
@@ -163,18 +163,19 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
   # ADDING LIFESTAGE - for facet_wrap STH and SCHN (not fall, which is stream)
   mutate(lifestage = case_when(
     # Hatchery (non-fall)
+    rear == 'Hatchery' & species == 'Steelhead' ~ 'Winter/Spring and Hatchery',
     rear == 'Hatchery' & release_groups %in% c('KNFH', 'NPTH', 'IMNHSC', 'LSHEEF', 'JOHNSC', 'LOLOCE', 'LOSTIP', 
                                                'MEAD2C', 'NEWSOC', 'REDHOS') ~ 'Smolt',
     rear == 'Hatchery' & release_groups %in% c('MEADOC') ~ 'Parr',
     rear == 'Hatchery' & release_groups %in% c('LOLOCY', 'NEWSAF') ~ 'Presmolt',
-    rear == 'Hatchery' & rear == 'Fall' ~ 'Subyearling',
+    rear == 'Hatchery' & run == 'Fall' ~ 'Subyearling',
     # Spring/summer Chinook
     species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(1:6) ~ 'Smolt',
     species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(7:8) ~ 'Parr',
     species == 'Chinook salmon' & rear == 'Natural' & month(release_date) %in% c(9:12) ~ 'Presmolt',  
     # Summer Steelhead
-    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(1:6) ~ 'Smolt',
-    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(7:12) ~ 'Summer/Fall tagged'
+    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(1:6) ~ 'Winter/Spring and Hatchery',
+    species == 'Steelhead' & rear == 'Natural' & month(release_date) %in% c(7:12) ~ 'Summer/Fall'
   )) %>%
   # FILTERS
   filter(obs_site %in% lgr_sites, # only LGR observation sites
@@ -188,10 +189,11 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
   filter(release_groups != 'Unassigned',
          release_site != 'LOSTIR')
 
-dart_my20$plot_group <- factor(dart_my20$plot_group, levels= c('Parr','Summer/Fall tagged','Presmolt','Smolt','Hatchery',
-                                                               'Clearwater River','Snake River'))
+dart_my20$plot_group <- factor(dart_my20$plot_group, levels= c('Parr','Summer/Fall','Presmolt','Smolt',"Winter/Spring and Hatchery",
+                                                               'Hatchery', 'Clearwater River','Snake River'))
 
-dart_my20$lifestage <- factor(dart_my20$lifestage, levels= c("Parr", "Summer/Fall tagged","Presmolt","Smolt", "Subyearling"))
+dart_my20$lifestage <- factor(dart_my20$lifestage, levels= c("Parr", "Summer/Fall","Presmolt","Smolt", 
+                                                             "Winter/Spring and Hatchery", "Subyearling"))
 
 save(dart_my20, file='./data/arrival/dart_my20.rda')
 # load(file='./data/arrival/dart_my20.rda')
