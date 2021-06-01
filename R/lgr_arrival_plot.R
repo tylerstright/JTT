@@ -3,6 +3,15 @@ library(tidyverse)
 library(lubridate)
 library(viridis)
 
+# STEELHEAD HOLDOVERS
+# holdovers <- sth_dart %>%
+#   filter(species == 'Steelhead',
+#          rear=='Natural',
+#          release_date < '2019-07-01',
+#          stage == 'J') %>%
+#   group_by(release_site) %>%
+#   tally()
+
 # load data - queried from DART
 load(file='./data/arrival/dart_my20.rda')
 
@@ -78,13 +87,17 @@ ggplot(dart_my20 %>% filter(species == 'Steelhead',
   scale_linetype_manual(breaks = c('Natural', 'Hatchery', 'Spring spill', 'Transport'), 
                         # values= c(1,2,4,6)) +
                         values= c('solid','dashed','dotted',11)) +
+  scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 0.9, 1.0), expand = expansion(mult = c(0,0.02))) +
   # theme(panel.grid.minor = element_blank()) +
   labs(y='Cumulative Proportion',
        color='Release Site', linetype='Line Types')+
-  ggtitle('Summer Steelhead: arrival timing at LGR') +
+  # ggtitle('Summer Steelhead: arrival timing at LGR') +
   # LT ADDON
-  theme(text=element_text(family="Times", size=12),
-        strip.background = element_blank())
+  theme(text=element_text(family="serif", size=12), # serif = "TT Times New Roman"  windowsFonts()
+        strip.background = element_blank()) +
+  # fix legend order.
+  guides(color = guide_legend(order=1),
+         linetype = guide_legend(order=2))
 
 ggsave(filename = './data/arrival/sth_my20.png', width = 10, height = 7)
 
@@ -106,12 +119,13 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run != 'Fall',
                      values = LT_spsu$plot_colors2) +
   scale_linetype_manual(breaks = c('Natural', 'Hatchery', 'Spring Spill', 'Transport'), 
                         values= c('solid','dashed','dotted',11)) +
+  scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 0.9, 1.0), expand = expansion(mult = c(0,0.02))) +
   # theme(panel.grid.minor = element_blank()) +
   labs(y = list(title='Cumulative Proportion'),
        color='Release Site', linetype='Line Types') +
-  ggtitle('Spring/summer Chinook salmon: arrival timing at LGR') +
+  # ggtitle('Spring/summer Chinook salmon: arrival timing at LGR') +
   # LT ADDON
-  theme(text=element_text(family="Times", size=12),
+  theme(text=element_text(family="serif", size=12),  
         strip.background = element_blank())
 
 ggsave(filename = './data/arrival/schn_my20.png', width = 10, height = 7)
@@ -132,12 +146,13 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run == 'Fall'),
                      values = LT_fall$plot_colors2) +
   scale_linetype_manual(breaks = c('Natural', 'Hatchery', 'Summer Spill'), 
                         values= c('solid','dashed','dotted')) +
+  scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 0.9, 1.0), expand = expansion(mult = c(0,0.02))) +
   # theme(panel.grid.minor = element_blank()) +
   labs(y = list(title='Cumulative Proportion'),
        color='Release Site', linetype='Line Types') +
-  ggtitle('Fall Chinook salmon: arrival timing at LGR') +
+  # ggtitle('Fall Chinook salmon: arrival timing at LGR') +
   # LT ADDON
-  theme(text=element_text(family="Times", size=12),
+  theme(text=element_text(family="serif", size=12),
         strip.background = element_blank())
 
 ggsave(filename = './data/arrival/fchn_my20.png', width = 10, height = 7)
