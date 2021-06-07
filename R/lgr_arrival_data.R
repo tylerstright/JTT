@@ -108,7 +108,7 @@ dart_my20 <- bind_rows(sth_dart, chn_dart) %>%
     release_site == 'LOLOC' & tag_file == 'SCS-2019-211-LC1.XML' ~ 'LOLOCY', # 11H Yoosa creek release
     release_site == 'MEADOC' & tag_file == 'SCS-2019-169-MC1.XML' ~ 'MEADOC', # MF Salmon / Meadow Creek
     # release_site == 'NEWSOC' & tag_file == 'SCS-2019-211-NC1.XML' ~ 'NEWSOC',  # 11H 
-    release_site == 'NEWSOC' & sprrt=='11H' ~ 'NEWSAF',  # 11H 
+    release_site == 'NEWSOC' & sprrt=='11H' & tag_file == "SCS-2019-211-NC1.XML" ~ 'NEWSAF',  # 11H   ****************************************6/7/21
     release_site == 'NPTH' & tag_file %in% c('SCS-2020-070-NP1.XML','SCS-2020-070-NP2.XML') ~ 'NPTH', # 11H
     release_site %in% c('IMNAHR','IMNAHW') ~ 'IMNHSC', # 11H  
     release_site == 'LOSTIP' ~ 'LOSTIP', # 11H
