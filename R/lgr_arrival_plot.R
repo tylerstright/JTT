@@ -148,8 +148,9 @@ ggplot(dart_my20 %>% filter(species == 'Chinook salmon', run == 'Fall'),
                         values= c('solid','dashed','dotted')) +
   scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 0.9, 1.0), expand = expansion(mult = c(0,0.02))) +
   # theme(panel.grid.minor = element_blank()) +
-  labs(y = list(title='Cumulative Proportion'),
-       color='Release Site', linetype='Line Types') +
+  labs(y = list(title='Cumulative Proportion')) + #, color='Release Group', linetype='Line Types') +
+  guides(color = guide_legend(title = "Release Group", order = 1),
+         linetype = guide_legend(title = "Line Types", order = 2)) +
   # ggtitle('Fall Chinook salmon: arrival timing at LGR') +
   # LT ADDON
   theme(text=element_text(family="serif", size=12),
