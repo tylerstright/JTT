@@ -5,19 +5,13 @@
 #' @import dplyr
 #' @author Tyler T. Stright
 #' @examples
-#' rst_raw <- get_RSTdata()
-#' rst_clean <- clean_RSTdata(rst_raw)
-#' rst_my <- my_RSTdata(imntrp = c('10/04/2019', '07/12/2020'),
-#'     johtrp = c('05/23/2019', '06/14/2020'),
-#'     loltrp = c('09/29/2019', '06/21/2020'),
-#'     sectrp = c('06/24/2019', '11/11/2019'),
-#'     sfctrp = c('09/26/2019', '06/21/2020'))
+#' p4_raw <- cdmsR::getP4data(MigrationYear = 2021)
+#' p4_clean <- cuyem::clean_P4data(p4_raw)
+#' tbl_targetCatch(p4_clean)
 
-library(flextable)
-
-# need to finish assigning streamnames in clean_RSTdata.R
 tbl_targetCatch <- function(data){
-  rst_clean %>%
+  data %>%
+    rename(species = srrverbose) %>%
     filter(target == 1,
            !is.na(emigrant_group)) %>%
     group_by(streamname, emigrant_group) %>%
@@ -31,6 +25,7 @@ tbl_targetCatch <- function(data){
            `Hatchery Smolts` = `Hatchery Chinook Salmon Smolts`,
            `Natural Juveniles` = `Natural Steelhead Juveniles`,
            `Hatchery Juveniles` = `Hatchery Steelhead Juveniles`) %>%
+    mutate(across(everything(), .fns= ~replace_na(., 'N/A'))) %>%
     flextable(cwidth = c(2, 1, 1, 1, 1, 1, 1)) %>%
     add_header_row(colwidths = c(1, 4, 2),
                    values = c('', 'Chinook Salmon', 'Steelhead')) %>%

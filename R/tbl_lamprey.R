@@ -5,24 +5,18 @@
 #' @import dplyr
 #' @author Tyler T. Stright
 #' @examples
-#' rst_raw <- get_RSTdata()
-#' rst_clean <- clean_RSTdata(rst_raw)
-#' rst_my <- my_RSTdata(imntrp = c('10/04/2019', '07/12/2020'),
-#'     johtrp = c('05/23/2019', '06/14/2020'),
-#'     loltrp = c('09/29/2019', '06/21/2020'),
-#'     sectrp = c('06/24/2019', '11/11/2019'),
-#'     sfctrp = c('09/26/2019', '06/21/2020'))
+#' p4_raw <- cdmsR::getP4data(MigrationYear = 2021, CaptureMethod = 'SCREWT)
+#' p4_clean <- cuyem::clean_P4data(p4_raw)
+#' tbl_lamprey(p4_clean)
 
-
-library(flextable)
-
-# we should pass this function data only from the MY in question. same data should be sent to all table/plot functions
-# so that processing is only done once.
 tbl_lamprey <- function(data) {
-  rst_clean %>%
+  
+  my21_clean %>%
+    rename(species = srrverbose) %>%
     filter(speciesrunreartype == 'A0W') %>%
     group_by(streamname, lifestage) %>%
     summarize(n = sum(nfish, na.rm = TRUE)) %>%
+    complete(streamname, lifestage = c('Ammocoete', 'Macropthalmia', 'Adult')) %>% # makes sure all life stages are present
     spread(key = lifestage, value = n) %>%
     mutate(across(everything(), .fns= ~replace_na(., 0))) %>%
     select(`Trap Site` = streamname, Ammocoete, Macropthalmia, Adult) %>%
