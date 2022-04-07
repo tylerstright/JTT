@@ -54,6 +54,9 @@ tbl_missedTransport <- function(data, transport_start, folder_path) {
     mutate(count = 1) %>%
     mutate(emigrant_group = paste(rear, gsub(' salmon', '', species), facet_var),
            emigrant_group = case_when(
+             # Special case for 2021
+             tag_id == "3DD.0077BCF553" ~ 'Natural steelhead summer/fall juveniles', 
+             # normal processing below
              grepl('Winter/Spring and Hatchery', emigrant_group) & rear == 'Hatchery' ~ gsub('Winter/Spring and Hatchery', 'juveniles', emigrant_group),
              grepl('Winter/Spring and Hatchery', emigrant_group) & month(release_date) %in% c(1:6) ~ gsub('Winter/Spring and Hatchery', 'winter/spring juveniles', emigrant_group),
              grepl('Summer/Fall', emigrant_group) & month(release_date) %in% c(7:12) ~ gsub('Summer/Fall', 'summer/fall juveniles', emigrant_group),
